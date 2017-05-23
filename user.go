@@ -3,7 +3,6 @@ package redmine
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -37,7 +36,7 @@ func (c *Client) Auth(username string, password string) (*User, error) {
 
 	var authstring = url.QueryEscape(username) + ":" + url.QueryEscape(password) + "@"
 	var endpoint = c.endpoint[0:strings.Index(c.endpoint, "//")+2] + authstring + c.endpoint[strings.Index(c.endpoint, "//")+2:]
-	fmt.Println(endpoint)
+	//fmt.Println(endpoint)
 	res, err := c.Get(endpoint + "/users/current.json")
 	if err != nil {
 		return nil, err
