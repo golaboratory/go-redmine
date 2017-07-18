@@ -42,6 +42,7 @@ type Issue struct {
 	StatusDate   string         `json:"status_date"`
 	CreatedOn    string         `json:"created_on"`
 	UpdatedOn    string         `json:"updated_on"`
+	ClosedOn     string         `json:"closed_on"`
 	CustomFields []*CustomField `json:"custom_fields,omitempty"`
 }
 
@@ -51,6 +52,7 @@ type IssueFilter struct {
 	TrackerId    string
 	StatusId     string
 	AssignedToId string
+	UpdatedOn    string
 }
 
 type CustomField struct {
@@ -86,13 +88,14 @@ func (c *Client) IssuesOf(projectId int) ([]Issue, error) {
 
 func (c *Client) Issue(id int) (*Issue, error) {
 	res, err := c.Get(c.endpoint + "/issues/" + strconv.Itoa(id) + ".json?key=" + c.apikey)
-	if res.StatusCode == 404 {
-		return nil, errors.New("Not Found")
-	}
 	if err != nil {
 		return nil, err
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode == 404 {
+		return nil, errors.New("Not Found")
+	}
 
 	decoder := json.NewDecoder(res.Body)
 	var r issueRequest
@@ -231,14 +234,14 @@ func (c *Client) UpdateIssue(issue Issue) error {
 	}
 	req.Header.Set("Content-Type", "application/json")
 	res, err := c.Do(req)
-	if res.StatusCode == 404 {
-		return errors.New("Not Found")
-	}
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
 
+	if res.StatusCode == 404 {
+		return errors.New("Not Found")
+	}
 	if res.StatusCode != 200 {
 		decoder := json.NewDecoder(res.Body)
 		var er errorsResult
@@ -260,13 +263,14 @@ func (c *Client) DeleteIssue(id int) error {
 	}
 	req.Header.Set("Content-Type", "application/json")
 	res, err := c.Do(req)
-	if res.StatusCode == 404 {
-		return errors.New("Not Found")
-	}
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode == 404 {
+		return errors.New("Not Found")
+	}
 
 	decoder := json.NewDecoder(res.Body)
 	if res.StatusCode != 200 {
@@ -302,6 +306,9 @@ func getIssueFilterClause(filter *IssueFilter) string {
 	}
 	if filter.AssignedToId != "" {
 		clause = clause + fmt.Sprintf("&assigned_to_id=%v", filter.AssignedToId)
+	}
+	if filter.UpdatedOn != "" {
+		clause = clause + fmt.Sprintf("&updated_on=%v", filter.UpdatedOn)
 	}
 
 	return clause

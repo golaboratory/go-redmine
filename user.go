@@ -26,6 +26,7 @@ type User struct {
 	LatLoginOn  string       `json:"last_login_on"`
 	APIKey      string       `json:"api_key"`
 	Memberships []Membership `json:"memberships"`
+	CustomFields []*CustomField `json:"custom_fields,omitempty"`
 }
 
 type authResult struct {
